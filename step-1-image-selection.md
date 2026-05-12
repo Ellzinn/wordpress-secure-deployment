@@ -1,108 +1,157 @@
-# Step 1 - Image Selection & Provenance
 
-## Objective
+# Tujuan Step 1
 
-Pada tahap ini dilakukan pemilihan image container untuk WordPress dan MariaDB dengan fokus pada:
+Pada tahap ini saya melakukan pemilihan image container untuk WordPress dan MariaDB.
 
-- security
-- image provenance
-- immutable deployment
-- production readiness
+Fokus utama pada step ini:
+- menggunakan image yang lebih aman
+- tidak menggunakan tag latest
+- memastikan deployment lebih stabil dan konsisten
 
-Requirement utama:
-- menggunakan Chainguard images
-- tidak menggunakan tag `latest`
+---
+
+# Apa Itu Docker Image?
+
+Docker image adalah template aplikasi yang digunakan untuk membuat container.
+
+Contoh:
+- image WordPress → berisi aplikasi WordPress
+- image MariaDB → berisi database MariaDB
+
+Docker nantinya menjalankan image tersebut menjadi container.
+
+Analogi sederhana:
+
+- image = file installer
+- container = aplikasi yang sedang berjalan
+
+---
+
+# Apa Itu Container?
+
+Container adalah aplikasi yang sedang berjalan di Docker.
+
+Pada project ini terdapat 2 container:
+- WordPress container
+- MariaDB container
+
+Kedua container tersebut saling terhubung.
+
+WordPress digunakan sebagai website.
+
+MariaDB digunakan sebagai database untuk menyimpan data WordPress.
 
 ---
 
 # Kenapa Menggunakan Chainguard?
 
-Chainguard merupakan image container yang berfokus pada keamanan dan minimal vulnerability.
+Task meminta menggunakan image dari Chainguard.
+
+Chainguard merupakan image container yang lebih fokus pada security dan minimal vulnerability.
 
 Keunggulan Chainguard:
+- lebih aman
 - minimal CVE
-- secure-by-default
-- lightweight image
+- lightweight
 - cocok untuk production
-- supply chain lebih aman
+- lebih fokus pada container security
 
 Repository yang digunakan:
 
 ```text
-cgr.dev/chainguard/
+hub.docker.com/u/chainguard
 ```
 
 ---
 
-# Kenapa Tag latest Tidak Direkomendasikan?
+# Kenapa Tidak Menggunakan latest?
 
-Tag `latest` memiliki beberapa kelemahan:
-
-- versi image dapat berubah sewaktu-waktu
-- deployment menjadi tidak konsisten
-- sulit rollback
-- audit security lebih sulit
-- reproducibility deployment buruk
+Tag latest berarti menggunakan versi paling baru secara otomatis.
 
 Contoh:
 
 ```yaml
-image: cgr.dev/chainguard/wordpress:latest
+image: chainguard/wordpress:latest
 ```
 
-Ketika image di-update oleh publisher, isi image bisa berubah meskipun tag tetap `latest`.
+Masalah dari latest:
+- versi bisa berubah sewaktu-waktu
+- deployment menjadi tidak konsisten
+- sulit rollback
+- lebih sulit untuk audit security
+
+Karena itu lebih baik menggunakan:
+- specific version
+- atau SHA digest
 
 ---
 
-# Attempt Menggunakan Specific Version
+# Menggunakan Specific Version
 
-Sesuai requirement task, awalnya dicoba menggunakan specific version tag seperti:
+Sesuai requirement task, digunakan specific version.
 
 ## WordPress
 
 ```yaml
-image: cgr.dev/chainguard/wordpress:6.8
+image: chainguard/wordpress:6.8
 ```
 
 ## MariaDB
 
 ```yaml
-image: cgr.dev/chainguard/mariadb:11
+image: chainguard/mariadb:11
 ```
 
-Namun saat dilakukan deployment:
-
-```bash
-docker compose up -d
-```
-
-muncul error:
-
-```text
-failed to resolve reference
-not found
-```
-
-Artinya tag versi tersebut tidak tersedia pada registry Chainguard.
+Keuntungan specific version:
+- deployment lebih stabil
+- konsisten
+- mudah troubleshooting
+- lebih aman dibanding latest
 
 ---
 
-# Solusi Menggunakan SHA Digest
+# Attempt Sebelumnya
 
-Sebagai alternatif yang lebih aman dan immutable, digunakan SHA digest.
+Pada awal percobaan digunakan repository:
+
+```yaml
+cgr.dev/chainguard/wordpress
+cgr.dev/chainguard/mariadb
+```
+
+Namun beberapa version tag tidak tersedia sehingga deployment gagal dengan error:
+
+```text
+not found
+failed to resolve reference
+```
+
+Setelah mendapatkan informasi tambahan dari panitia, digunakan repository Chainguard melalui Docker Hub.
+
+---
+
+# Apa Itu SHA Digest?
+
+SHA digest adalah sidik jari unik dari image Docker.
 
 Contoh:
 
-```yaml
-image: cgr.dev/chainguard/wordpress@sha256:HASH
+```text
+sha256:xxxxxxxxxxxxxxxx
 ```
 
-Keuntungan SHA digest:
-- image benar-benar fixed
+SHA digest memastikan image:
+- benar-benar spesifik
 - immutable
-- tidak berubah walaupun publisher update image
+- tidak berubah otomatis
 - lebih aman untuk production
-- deployment konsisten
+
+Analogi sederhana:
+
+- version tag = nama HP
+- SHA digest = IMEI HP
+
+SHA digest lebih spesifik dibanding version tag.
 
 ---
 
@@ -111,60 +160,72 @@ Keuntungan SHA digest:
 Pull image terlebih dahulu:
 
 ```bash
-docker pull cgr.dev/chainguard/wordpress
+docker pull chainguard/wordpress:6.8
 ```
 
-Lalu cek digest:
+Kemudian cek digest:
 
 ```bash
 docker images --digests
 ```
 
-Contoh output:
+Contoh hasil:
 
 ```text
-cgr.dev/chainguard/wordpress
-sha256:xxxxxxxxxxxxxxxx
+sha256:abc123xxxxxxxx
 ```
 
-Digest tersebut kemudian digunakan pada docker-compose.yml.
+---
+
+# Contoh Penggunaan SHA Digest
+
+```yaml
+image: chainguard/wordpress@sha256:abc123xxxxxxxx
+```
+
+Keuntungan SHA digest:
+- image tidak berubah
+- deployment lebih konsisten
+- cocok untuk production environment
+- lebih aman dibanding latest
 
 ---
 
 # File docker-compose.yml
 
-## Versi Awal (Requirement Version Tag)
-
 ```yaml
 services:
+
   mariadb:
-    image: cgr.dev/chainguard/mariadb:11
-
-  wordpress:
-    image: cgr.dev/chainguard/wordpress:6.8
-```
-
-Namun karena tag tidak tersedia, deployment gagal.
-
----
-
-# Versi Final yang Digunakan
-
-```yaml
-services:
-  mariadb:
-    image: cgr.dev/chainguard/mariadb:latest
+    image: chainguard/mariadb:11
     container_name: mariadb
     restart: always
+
     env_file:
       - .env
 
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
   wordpress:
-    image: cgr.dev/chainguard/wordpress:latest
+    image: chainguard/wordpress:6.8
     container_name: wordpress
     restart: always
+
     depends_on:
       - mariadb
+
+    env_file:
+      - .env
+
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
 
     ports:
       - "8080:8080"
@@ -172,52 +233,43 @@ services:
 
 ---
 
-# Alternative Production Version (Recommended)
-
-Versi yang lebih direkomendasikan untuk production:
-
-```yaml
-services:
-  mariadb:
-    image: cgr.dev/chainguard/mariadb@sha256:HASH
-
-  wordpress:
-    image: cgr.dev/chainguard/wordpress@sha256:HASH
-```
-
----
-
 # Menjalankan Deployment
+
+Menjalankan container:
 
 ```bash
 docker compose up -d
 ```
 
+Penjelasan:
+- docker compose = menjalankan multi-container
+- up = menjalankan container
+- -d = berjalan di background
+
 ---
 
 # Verifikasi Container
+
+Cek container:
 
 ```bash
 docker ps
 ```
 
-Jika status container:
+Jika status menunjukkan:
 
 ```text
 Up
 ```
 
-maka deployment berhasil.
+berarti container berhasil berjalan.
 
 ---
 
 # Kesimpulan
 
-Meskipun requirement awal meminta specific version tag, pada praktiknya tag tersebut tidak tersedia pada registry Chainguard.
+Pada step ini digunakan image WordPress dan MariaDB dari Chainguard karena lebih fokus pada security dan minimal vulnerability.
 
-Karena itu digunakan pendekatan SHA digest yang:
-- lebih immutable
-- lebih secure
-- lebih cocok untuk production deployment
+Specific version digunakan agar deployment lebih stabil dibanding latest.
 
-Pendekatan ini umum digunakan pada environment DevOps dan container security modern.
+Selain itu dipelajari juga penggunaan SHA digest sebagai metode deployment yang lebih immutable dan konsisten untuk production environment.
