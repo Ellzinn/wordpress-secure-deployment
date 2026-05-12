@@ -1,0 +1,37 @@
+services:
+  mariadb:
+    image: cgr.dev/chainguard/mariadb:latest
+    container_name: mariadb
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - backend_net
+
+  wordpress:
+    image: cgr.dev/chainguard/wordpress:latest
+    container_name: wordpress
+    restart: always
+    depends_on:
+      - mariadb
+    env_file:
+      - .env
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+    ports:
+      - "8080:8080"
+    networks:
+      - frontend_net
+      - backend_net
+
+networks:
+  frontend_net:
+  backend_net:
