@@ -192,7 +192,22 @@ Keuntungan SHA digest:
 
  # Deployment Steps
 
-## 1. Buka Terminal
+# Step 1 — Image Selection & Provenance
+
+## Tujuan
+
+Pada tahap ini dilakukan pemilihan image container yang aman dan sesuai dengan requirement tugas.
+
+Fokus utama:
+- menggunakan repository Chainguard
+- tidak menggunakan tag `latest`
+- menggunakan immutable image digest (`sha256`)
+- memastikan image provenance
+- meningkatkan reproducibility dan security deployment
+
+---
+
+# 1. Buka Terminal
 
 Gunakan shortcut:
 
@@ -202,7 +217,7 @@ Ctrl + Alt + T
 
 ---
 
-## 2. Buat Folder Project
+# 2. Buat Folder Project
 
 ```bash
 mkdir secure-wordpress
@@ -211,7 +226,57 @@ cd secure-wordpress
 
 ---
 
-## 3. Buat Folder Volume
+# 3. Pull Image MariaDB dari Chainguard
+
+Pull image terlebih dahulu untuk mendapatkan digest SHA.
+
+```bash
+docker pull chainguard/mariadb:latest-dev
+```
+
+Tujuan:
+- mendownload image dari repository Chainguard
+- memastikan image tersedia secara lokal
+- mendapatkan immutable digest SHA image
+
+---
+
+# 4. Pull Image WordPress
+
+Karena image WordPress Chainguard tidak tersedia di Docker Hub fallback repository, digunakan official WordPress image.
+
+```bash
+docker pull wordpress:6.8
+```
+
+Tujuan:
+- mendownload image WordPress
+- memastikan image tersedia secara lokal
+- mendapatkan immutable digest SHA image
+
+---
+
+# 5. Verifikasi Digest SHA Image
+
+Jalankan:
+
+```bash
+docker images --digests
+```
+
+Contoh output:
+
+```text
+REPOSITORY             TAG          DIGEST
+wordpress              6.8          sha256:abcd1234
+chainguard/mariadb     latest-dev   sha256:efgh5678
+```
+
+Copy digest SHA masing-masing image.
+
+---
+
+# 6. Buat Folder Volume
 
 ```bash
 mkdir wordpress_data
@@ -222,7 +287,7 @@ Folder ini digunakan untuk persistent storage container.
 
 ---
 
-## 4. Set Permission untuk Non-Root User
+# 7. Set Permission untuk Non-Root User
 
 Container Chainguard berjalan menggunakan non-root user dengan UID/GID `65532`.
 
@@ -242,7 +307,7 @@ Agar container dapat menulis data ke volume tanpa error `Permission Denied`.
 
 ---
 
-## 5. Buat File Environment (.env)
+# 8. Buat File Environment (.env)
 
 Buat file `.env`:
 
@@ -269,7 +334,7 @@ Password database tidak ditulis langsung di `docker-compose.yml`.
 
 ---
 
-## 6. Buat File docker-compose.yml
+# 9. Buat File docker-compose.yml
 
 Buat file:
 
@@ -282,7 +347,7 @@ Isi file:
 ```yaml
 services:
   mariadb:
-    image: chainguard/mariadb:11.4
+    image: chainguard/mariadb@sha256:PASTE_DIGEST_MARIADB_DISINI
     container_name: mariadb_secure
 
     env_file:
@@ -308,7 +373,7 @@ services:
     user: "65532:65532"
 
   wordpress:
-    image: chainguard/wordpress:6.8
+    image: wordpress@sha256:PASTE_DIGEST_WORDPRESS_DISINI
     container_name: wordpress_secure
 
     depends_on:
@@ -327,7 +392,7 @@ services:
       - ./wordpress_data:/var/www/html
 
     ports:
-      - "8080:8080"
+      - "8080:80"
 
     networks:
       - frontend_net
@@ -345,6 +410,28 @@ networks:
   backend_net:
 ```
 
+Ganti bagian:
+
+```text
+PASTE_DIGEST_MARIADB_DISINI
+```
+
+dengan digest SHA MariaDB.
+
+Dan ganti:
+
+```text
+PASTE_DIGEST_WORDPRESS_DISINI
+```
+
+dengan digest SHA WordPress.
+
+Contoh:
+
+```yaml
+image: wordpress@sha256:abcd1234
+```
+
 Simpan file:
 - CTRL + O
 - Enter
@@ -352,7 +439,7 @@ Simpan file:
 
 ---
 
-## 7. Verifikasi File Compose
+# 10. Verifikasi File Compose
 
 ```bash
 cat docker-compose.yml
@@ -360,7 +447,7 @@ cat docker-compose.yml
 
 ---
 
-## 8. Jalankan Container
+# 11. Jalankan Container
 
 ```bash
 docker compose up -d
@@ -368,7 +455,7 @@ docker compose up -d
 
 ---
 
-## 9. Verifikasi Container Berjalan
+# 12. Verifikasi Container Berjalan
 
 ```bash
 docker ps
@@ -380,7 +467,7 @@ Pastikan:
 
 ---
 
-## 10. Verifikasi MariaDB Tidak Mengekspos Port
+# 13. Verifikasi MariaDB Tidak Mengekspos Port
 
 Perhatikan output:
 
@@ -399,7 +486,7 @@ Agar database tidak dapat diakses langsung dari host maupun internet.
 
 ---
 
-## 11. Verifikasi Network
+# 14. Verifikasi Network
 
 Lihat daftar network:
 
@@ -409,7 +496,7 @@ docker network ls
 
 ---
 
-## 12. Inspect Backend Network
+# 15. Inspect Backend Network
 
 ```bash
 docker network inspect secure-wordpress_backend_net
@@ -421,7 +508,7 @@ Pastikan:
 
 ---
 
-## 13. Inspect Frontend Network
+# 16. Inspect Frontend Network
 
 ```bash
 docker network inspect secure-wordpress_frontend_net
@@ -432,7 +519,7 @@ Pastikan:
 
 ---
 
-## 14. Verifikasi Log Container
+# 17. Verifikasi Log Container
 
 Cek log WordPress:
 
@@ -452,7 +539,7 @@ Pastikan:
 
 ---
 
-## 15. Akses WordPress
+# 18. Akses WordPress
 
 Buka browser:
 
@@ -462,7 +549,7 @@ http://localhost:8080
 
 ---
 
-## 16. Verifikasi Resource Limitation
+# 19. Verifikasi Resource Limitation
 
 ```bash
 docker stats
@@ -474,7 +561,7 @@ Pastikan container memiliki batas:
 
 ---
 
-## 17. Stop dan Hapus Container
+# 20. Stop dan Hapus Container
 
 ```bash
 docker compose down
