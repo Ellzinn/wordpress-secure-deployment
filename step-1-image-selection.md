@@ -360,12 +360,6 @@ Pastikan:
 
 ---
 
-## Hasil Akhir
-
-- WordPress dapat diakses dari frontend network
-- WordPress dapat berkomunikasi dengan MariaDB melalui backend network
-- MariaDB tidak memiliki akses langsung dari host atau internet
-
 ## 3. Security & Permission
 - Non-root container (UID 65532)
 - Volume ownership fixed using chown 65532:65532
