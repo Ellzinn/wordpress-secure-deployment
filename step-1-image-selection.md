@@ -277,41 +277,94 @@ Copy digest SHA masing-masing image.
 
 ---
 
-## 2. Network Segregation
-...
+#  2. Network Segregation (Isolasi Jaringan)
 
-#  Verifikasi Network
-
-Lihat daftar network:
-
-bash
-docker network ls
-
+##  Tujuan
+Tahap ini bertujuan untuk memisahkan trafik frontend dan backend agar WordPress dapat diakses dari luar, sementara MariaDB hanya dapat diakses secara internal melalui Docker network.
 
 ---
 
-#  Inspect Backend Network
+## Membuat dan Memverifikasi Network
 
-bash
-docker network inspect secure-wordpress_backend_net
+Buat dua network terpisah:
 
+```bash
+docker network create frontend_net
+docker network create backend_net
+docker network ls
+```
+
+Pastikan terdapat:
+- `frontend_net`
+- `backend_net`
+
+---
+
+## Konfigurasi Network pada docker-compose.yml
+
+Tambahkan konfigurasi berikut pada file `docker-compose.yml`:
+
+```yaml
+services:
+  mariadb:
+    networks:
+      - backend_net
+
+  wordpress:
+    networks:
+      - frontend_net
+      - backend_net
+
+networks:
+  frontend_net:
+    driver: bridge
+
+  backend_net:
+    driver: bridge
+```
+
+---
+
+## Security Rule
+
+MariaDB tidak boleh diekspos ke host maupun internet.
+
+```text
+❌ Jangan gunakan:
+ports:
+  - "3306:3306"
+```
+
+---
+
+## Verifikasi Isolasi Network
+
+Cek backend network:
+
+```bash
+docker network inspect backend_net
+```
 
 Pastikan:
 - WordPress terhubung
 - MariaDB terhubung
 
----
+Cek frontend network:
 
-#  Inspect Frontend Network
-
-bash
-docker network inspect secure-wordpress_frontend_net
-
+```bash
+docker network inspect frontend_net
+```
 
 Pastikan:
 - Hanya WordPress yang terhubung
 
 ---
+
+## Hasil Akhir
+
+- WordPress dapat diakses dari frontend network
+- WordPress dapat berkomunikasi dengan MariaDB melalui backend network
+- MariaDB tidak memiliki akses langsung dari host atau internet
 
 ## 3. Security & Permission
 - Non-root container (UID 65532)
