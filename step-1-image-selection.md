@@ -334,6 +334,10 @@ Cek backend network:
 docker network inspect backend_net
 ```
 
+```bash
+docker network inspect secure-wordpress_backend_net
+```
+
 Pastikan:
 - WordPress terhubung
 - MariaDB terhubung
@@ -342,6 +346,10 @@ Cek frontend network:
 
 ```bash
 docker network inspect frontend_net
+```
+
+```bash
+docker network inspect secure-wordpress_frontend_net
 ```
 
 Pastikan:
