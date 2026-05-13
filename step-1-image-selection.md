@@ -1,15 +1,4 @@
 
-# Tujuan Step 1
-
-Pada tahap ini saya melakukan pemilihan image container untuk WordPress dan MariaDB.
-
-Fokus utama pada step ini:
-- menggunakan image yang lebih aman
-- tidak menggunakan tag latest
-- memastikan deployment lebih stabil dan konsisten
-
----
-
 # Apa Itu Docker Image?
 
 Docker image adalah template aplikasi yang digunakan untuk membuat container.
