@@ -192,7 +192,8 @@ Keuntungan SHA digest:
 
  # Deployment Steps
 
-# Step 1 — Image Selection & Provenance
+## 1. Image Selection
+...
 
 ## Tujuan
 
@@ -276,7 +277,49 @@ Copy digest SHA masing-masing image.
 
 ---
 
-# 6. Buat Folder Volume
+## 2. Network Segregation
+...
+
+# 6. Verifikasi Network
+
+Lihat daftar network:
+
+bash
+docker network ls
+
+
+---
+
+# 7. Inspect Backend Network
+
+bash
+docker network inspect secure-wordpress_backend_net
+
+
+Pastikan:
+- WordPress terhubung
+- MariaDB terhubung
+
+---
+
+# 8. Inspect Frontend Network
+
+bash
+docker network inspect secure-wordpress_frontend_net
+
+
+Pastikan:
+- Hanya WordPress yang terhubung
+
+---
+
+## 3. Security & Permission
+- Non-root container (UID 65532)
+- Volume ownership fixed using chown 65532:65532
+- Verified using docker exec id
+
+
+# 9. Buat Folder Volume
 
 ```bash
 mkdir wordpress_data
@@ -287,7 +330,7 @@ Folder ini digunakan untuk persistent storage container.
 
 ---
 
-# 7. Set Permission untuk Non-Root User
+# 10. Set Permission untuk Non-Root User
 
 Container Chainguard berjalan menggunakan non-root user dengan UID/GID `65532`.
 
@@ -307,7 +350,10 @@ Agar container dapat menulis data ke volume tanpa error `Permission Denied`.
 
 ---
 
-# 8. Buat File Environment (.env)
+## 4. Secret Management
+...
+
+# 11. Buat File Environment (.env)
 
 Buat file `.env`:
 
@@ -333,8 +379,9 @@ Tujuan:
 Password database tidak ditulis langsung di `docker-compose.yml`.
 
 ---
+## Lanjutan step 3
 
-# 9. Buat File docker-compose.yml
+# 12. Buat File docker-compose.yml
 
 Buat file:
 
@@ -439,7 +486,7 @@ Simpan file:
 
 ---
 
-# 10. Verifikasi File Compose
+# 13. Verifikasi File Compose
 
 ```bash
 cat docker-compose.yml
@@ -447,7 +494,7 @@ cat docker-compose.yml
 
 ---
 
-# 11. Jalankan Container
+# 14. Jalankan Container
 
 ```bash
 docker compose up -d
@@ -455,7 +502,7 @@ docker compose up -d
 
 ---
 
-# 12. Verifikasi Container Berjalan
+# 15. Verifikasi Container Berjalan
 
 ```bash
 docker ps
@@ -467,7 +514,7 @@ Pastikan:
 
 ---
 
-# 13. Verifikasi MariaDB Tidak Mengekspos Port
+# 16. Verifikasi MariaDB Tidak Mengekspos Port
 
 Perhatikan output:
 
@@ -486,38 +533,6 @@ Agar database tidak dapat diakses langsung dari host maupun internet.
 
 ---
 
-# 14. Verifikasi Network
-
-Lihat daftar network:
-
-```bash
-docker network ls
-```
-
----
-
-# 15. Inspect Backend Network
-
-```bash
-docker network inspect secure-wordpress_backend_net
-```
-
-Pastikan:
-- WordPress terhubung
-- MariaDB terhubung
-
----
-
-# 16. Inspect Frontend Network
-
-```bash
-docker network inspect secure-wordpress_frontend_net
-```
-
-Pastikan:
-- Hanya WordPress yang terhubung
-
----
 
 # 17. Verifikasi Log Container
 
@@ -548,6 +563,12 @@ http://localhost:8080
 ```
 
 ---
+
+## 5. Resource Limitation
+- CPU limit: 0.5
+- Memory limit: 512MB
+- Verified using docker stats
+  
 
 # 19. Verifikasi Resource Limitation
 
