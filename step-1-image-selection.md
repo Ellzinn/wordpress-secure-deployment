@@ -600,10 +600,15 @@ Pastikan container memiliki batas:
 
 ---
 
-#  Stop dan Hapus Container
+#  Trial
 
 ```bash
 docker compose down
+sudo rm -rf mariadb_data
+mkdir mariadb_data
+sudo chmod -R 777 mariadb_data
+docker compose up -d
+docker ps
 ```
 
 # Kesimpulan
