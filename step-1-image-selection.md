@@ -35,13 +35,11 @@ MariaDB digunakan sebagai database untuk menyimpan data WordPress.
 
 Task meminta menggunakan image dari Chainguard.
 
-Chainguard merupakan image container yang lebih fokus pada security dan minimal vulnerability.
+Saya menggunakan Chainguard karena image-nya lebih fokus ke security dan dibuat seminimal mungkin
 
 Keunggulan Chainguard:
 - lebih aman
 - minimal CVE
-- lightweight
-- cocok untuk production
 - lebih fokus pada container security
 
 Repository yang digunakan:
@@ -65,8 +63,6 @@ image: chainguard/wordpress:latest
 Masalah dari latest:
 - versi bisa berubah sewaktu-waktu
 - deployment menjadi tidak konsisten
-- sulit rollback
-- lebih sulit untuk audit security
 
 Karena itu lebih baik menggunakan:
 - specific version
