@@ -53,16 +53,14 @@ hub.docker.com/u/chainguard
 # Kenapa Tidak Menggunakan latest?
 
 Tag latest berarti menggunakan versi paling baru secara otomatis.
+Saya tidak menggunakan tag latest karena sifatnya dinamis, artinya versi image bisa berubah sewaktu-waktu
+Hal ini bisa menyebabkan deployment menjadi tidak konsisten dan sulit untuk di-troubleshoot jika terjadi masalah.
 
 Contoh:
 
 ```yaml
 image: chainguard/wordpress:latest
 ```
-
-Masalah dari latest:
-- versi bisa berubah sewaktu-waktu
-- deployment menjadi tidak konsisten
 
 Karena itu lebih baik menggunakan:
 - specific version
@@ -94,29 +92,10 @@ Keuntungan specific version:
 
 ---
 
-# Attempt Sebelumnya
-
-Pada awal percobaan digunakan repository:
-
-```yaml
-cgr.dev/chainguard/wordpress
-cgr.dev/chainguard/mariadb
-```
-
-Namun beberapa version tag tidak tersedia sehingga deployment gagal dengan error:
-
-```text
-not found
-failed to resolve reference
-```
-
-Setelah mendapatkan informasi tambahan dari panitia, digunakan repository Chainguard melalui Docker Hub.
-
----
-
 # Apa Itu SHA Digest?
 
 SHA digest adalah identitas unik dari image Docker.
+Dengan SHA digest, image yang digunakan akan selalu sama persis, sehingga lebih konsisten dan aman untuk deployment.
 
 Contoh:
 
