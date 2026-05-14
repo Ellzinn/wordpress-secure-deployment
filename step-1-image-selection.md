@@ -24,7 +24,7 @@ Pada project ini terdapat 2 container:
 - WordPress container
 - MariaDB container
 
-Kedua container tersebut saling terhubung.Akses WordPress
+Kedua container tersebut saling terhubung.
 
 WordPress digunakan sebagai website.
 
@@ -121,7 +121,7 @@ Setelah mendapatkan informasi tambahan dari panitia, digunakan repository Chaing
 
 # Apa Itu SHA Digest?
 
-SHA digest adalah sidik jari unik dari image Docker.
+SHA digest adalah identitas unik dari image Docker.
 
 Contoh:
 
