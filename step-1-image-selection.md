@@ -14,7 +14,6 @@ Analogi sederhana:
 - image = file installer
 - container = aplikasi yang sedang berjalan
 
----Akses WordPress
 
 # Apa Itu Container?
 
