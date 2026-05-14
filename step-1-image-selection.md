@@ -600,7 +600,7 @@ Pastikan container memiliki batas:
 
 ---
 
-#  Trial
+#  
 
 ```bash
 docker compose down
