@@ -614,6 +614,16 @@ docker ps
 ```bash
 nano docker-compose.yml
 
+
+cat docker-compose.yml
+
+sudo rm -rf mariadb_data
+mkdir mariadb_data
+sudo chmod -R 777 mariadb_data
+docker compose up -d
+docker ps
+
+
 services:
   mariadb:
     image: chainguard/mariadb@sha256:ecb2d7394f4cc421bdcdf6629f65ae88269b1d59920500e19343d0fa023ffaec
@@ -673,15 +683,6 @@ services:
 networks:
   kellner_net:
   koch_net:
-
-cat docker-compose.yml
-
-sudo rm -rf mariadb_data
-mkdir mariadb_data
-sudo chmod -R 777 mariadb_data
-docker compose up -d
-docker ps
-
 
 ```
 
