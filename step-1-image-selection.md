@@ -614,6 +614,16 @@ docker ps
 ```bash
 nano docker-compose.yml
 
+cd ~/secure-wordpress
+ls -la
+
+MYSQL_DATABASE=wordpress
+MYSQL_USER=wpuser
+MYSQL_PASSWORD=password123
+MYSQL_ROOT_PASSWORD=rootpassword123
+
+cat .env
+docker compose up -d
 
 cat docker-compose.yml
 
