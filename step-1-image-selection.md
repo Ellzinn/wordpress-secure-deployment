@@ -611,6 +611,80 @@ docker compose up -d
 docker ps
 ```
 
+```bash
+nano docker-compose.yml
+
+services:
+  mariadb:
+    image: chainguard/mariadb@sha256:ecb2d7394f4cc421bdcdf6629f65ae88269b1d59920500e19343d0fa023ffaec
+    container_name: mariadb_secure
+
+    env_file:
+      - .env
+
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+    volumes:
+      - ./mariadb_data:/var/lib/mysql
+
+    networks:
+      - koch_net
+
+    restart: unless-stopped
+
+    mem_limit: 512m
+    cpus: "0.5"
+
+  wordpress:
+    image: wordpress@sha256:30bff39330d1693b0ce13d32fc9b7bb67193064f040b7d60d3494e136fa599d4
+    container_name: wordpress_secure
+
+    depends_on:
+      - mariadb
+
+    env_file:
+      - .env
+
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+
+    volumes:
+      - ./wordpress_data:/var/www/html
+
+    ports:
+      - "8080:80"
+
+    networks:
+      - kellner_net
+      - koch_net
+
+    restart: unless-stopped
+
+    mem_limit: 512m
+    cpus: "0.5"
+
+networks:
+  kellner_net:
+  koch_net:
+
+cat docker-compose.yml
+
+sudo rm -rf mariadb_data
+mkdir mariadb_data
+sudo chmod -R 777 mariadb_data
+docker compose up -d
+docker ps
+
+
+```
+
 # Kesimpulan
 
 Pada step ini digunakan image WordPress dan MariaDB dari Chainguard karena lebih fokus pada security dan minimal vulnerability.
